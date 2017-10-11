@@ -15,7 +15,7 @@ import numpy as np
 style.use("ggplot")
 
 #20 different colors for graphing
-COLORS = itertools.cycle(["#f4c242", "#61a323", "#161efc", "#cc37c7", 
+COLORS = itertools.cycle(["#f4c242", "#61a323", "#161efc", "#cc37c7",
 			"#ff0000", "#f6ff05", "#000000", "#706c6c",
 			"#7200ff", "#4d8e82", "#c1fff3", "#7a89e8",
 			"#82689b", "b", "g", "r", "c", "m", "y", "w",])
@@ -35,8 +35,8 @@ def createDataFrame(afpd, features):
 	preFrameDict["playlist"] = []
 	for i in sorted(afpd.keys()):
 		for j in afpd[i]:
-			preFrameDict["playlist"].append(i) 
-			preFrameDict["songid"].append(j["songid"]) 
+			preFrameDict["playlist"].append(i)
+			preFrameDict["songid"].append(j["songid"])
 			for q in features:
 				preFrameDict[q].append(j[q])
 	df = pd.DataFrame(preFrameDict)
@@ -50,13 +50,13 @@ def graph3DAllNodes(df, features):
 	if len(features) == 3:
 		fig = plt.figure()
 		ax = fig.add_subplot(111, projection='3d')
-		
+
 		xs = df[features[0]]
 		ys = df[features[1]]
 		zs = df[features[2]]
 		ax.scatter(xs, ys, zs, c='g', marker='o')
-		
-		
+
+
 		ax.set_xlabel(features[0])
 		ax.set_ylabel(features[1])
 		ax.set_zlabel(features[2])
@@ -66,12 +66,12 @@ def graph3DAllNodes(df, features):
 
 def graph2DAllNodes(df, features):
 	if len(features) == 2:
-		
+
 		xs = df[features[0]]
 		ys = df[features[1]]
 		plt.scatter(xs, ys, c='g', marker='o')
-		
-		
+
+
 		plt.xlabel = features[0]
 		plt.ylabel = features[1]
 		plt.show()
@@ -101,13 +101,85 @@ def graph3DPlaylistsDifferentColors(df, features, playlists):
 			ys = pdf[features[1]]
 			zs = pdf[features[2]]
 			ax.scatter(xs, ys, zs, c=next(COLORS), marker='o')
-		
+
 		ax.set_xlabel(features[0])
 		ax.set_ylabel(features[1])
 		ax.set_zlabel(features[2])
 		plt.show()
 	else:
 		print("need 3 features to do 3D graph")
+
+def graph3DPlotlyCategoriesDifferentColors(df, features, categories):
+	if len(features) == 3:
+		traces = []
+		for i in list(range(0,len(categories))):
+			pdf = df[df["category"] == categories[i]]
+			x = pdf[features[0]]
+			y = pdf[features[1]]
+			z = pdf[features[2]]
+			traces.append(go.Scatter3d(
+			    x=x,
+			    y=y,
+			    z=z,
+				name=categories[i],
+			    mode='markers',
+			    marker=dict(
+			        size=12,
+			        line=dict(
+			            color='rgba(217, 217, 217, 0.14)',
+			            width=0.5
+			        ),
+			        opacity=0.8
+			    )
+			))
+		data = traces
+		layout = go.Layout(
+		    margin=dict(
+		        l=0,
+		        r=0,
+		        b=0,
+		        t=0
+		    )
+		)
+		fig = go.Figure(data=data, layout=layout)
+		py.plot(fig)
+	else:
+		print("need 3 features to do 3D graph")
+
+def graph2DPlotlyCategoriesDifferentColors(df, features, categories):
+	if len(features) == 2:
+		traces = []
+		for i in list(range(0,len(categories))):
+			pdf = df[df["category"] == categories[i]]
+			x = pdf[features[0]]
+			y = pdf[features[1]]
+			traces.append(go.Scatter(
+			    x=x,
+			    y=y,
+				name=categories[i],
+			    mode='markers',
+			    marker=dict(
+			        size=12,
+			        line=dict(
+			            color='rgba(217, 217, 217, 0.14)',
+			            width=0.5
+			        ),
+			        opacity=0.8
+			    )
+			))
+		data = traces
+		layout = go.Layout(
+		    margin=dict(
+		        l=0,
+		        r=0,
+		        b=0,
+		        t=0
+		    )
+		)
+		fig = go.Figure(data=data, layout=layout)
+		py.plot(fig)
+	else:
+		print("need 2 features to do 2D graph")
 
 def PCAOnDataFrame(df, features, components):
 	pca = PCA(n_components=components)
@@ -123,7 +195,7 @@ def PCAOnDataFrame(df, features, components):
 		preFrameDict["playlist"].append(df["playlist"][i])
 		for j in list(range(0,components)):
 			preFrameDict[str(j+1)].append(newData[i][j])
-	newDataFrame = pd.DataFrame(preFrameDict)	
+	newDataFrame = pd.DataFrame(preFrameDict)
 	#normalize data
 	min_max_scaler = preprocessing.MinMaxScaler()
 	for i in list(range(1,components+1)):
@@ -146,7 +218,7 @@ allFeatures = ["popularity", "danceability", "energy", "key", "loudness", "speec
 				 "instrumentalness", "liveness", "valence", "tempo", "time_signature"]
 
 playlists = sorted(list(allFeaturedPlaylistData.keys()))
-df = createDataFrame(allFeaturedPlaylistData, allFeatures)	
+df = createDataFrame(allFeaturedPlaylistData, allFeatures)
 #pcadf = PCAOnDataFrame(df, allFeatures, 2)
 #graph2DPlaylistsDifferentColors(pcadf, ['1','2'], playlists)
 #pcadf = PCAOnDataFrame(df, allFeatures, 3)
